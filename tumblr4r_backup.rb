@@ -41,8 +41,16 @@ module Tumblr4r
       # get array of post_ids for posts already backed up
       existing = []
       Dir["#{@backup_path}/*.markdown"].each do |f|
-        postmeta = YAML.load_file(f)
-        existing.push(postmeta["post-id"])
+        begin
+          postmeta = YAML.load_file(f)
+          existing.push(postmeta["post-id"])
+        rescue Exception => e
+          p '---------------------------'
+          p 'Rescued from an exception: '
+          p e.message
+          p e.backtrace
+          p '---------------------------'
+        end
       end
       return existing 
     end
@@ -155,11 +163,19 @@ module Tumblr4r
       # iterate through urls, get the files
       bp[:content][:media].each do |url|
         unless url.empty? 
-          response = open(url)
-          filename = "#{media_dir}/#{response.base_uri.path.slice(/[^\/]+$/)}"
-          file = open(filename, 'w')
-          file.write(response.read)
-          file.close
+          begin
+            response = open(url)
+            filename = "#{media_dir}/#{response.base_uri.path.slice(/[^\/]+$/)}"
+            file = open(filename, 'w')
+            file.write(response.read)
+            file.close
+          rescue Exception => e
+            p '---------------------------'
+            p 'Rescued from an exception: '
+            p e.message
+            p e.backtrace
+            p '---------------------------'
+          end
         end
       end
     end
